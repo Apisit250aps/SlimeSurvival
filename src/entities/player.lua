@@ -11,22 +11,22 @@ function Player:new()
         -- genaral
         position = {
             x = 100,
-            y = 100,
+            y = 100
         },
         speed = {
             min = 100,
-            base = 200,
-            max = 200,
+            base = 100,
+            max = 100
         },
         health = {
             min = 0,
             base = 100,
-            max = 100,
+            max = 100
         },
         stamina = {
             min = 0,
             base = 100,
-            max = 100,
+            max = 100
         },
         sprite = {
             sheet = love.graphics.newImage("assets/sprites/entities/player.png"),
@@ -34,16 +34,16 @@ function Player:new()
             currentFrame = 1,
             frameTimer = 0,
             frameDuration = 0.125,
-            scale = 1.5,
-        },
+            scale = 1.5
+        }
     }
     -- anim
     local g = anim8.newGrid(32, 32, this.sprite.sheet:getWidth(), this.sprite.sheet:getHeight())
     animations = {
         right = anim8.newAnimation(g('1-4', 2), 0.125),
-        left  = anim8.newAnimation(g('1-4', 3), 0.125),
-        down  = anim8.newAnimation(g('1-4', 1), 0.125),
-        up    = anim8.newAnimation(g('1-4', 4), 0.125),
+        left = anim8.newAnimation(g('1-4', 3), 0.125),
+        down = anim8.newAnimation(g('1-4', 1), 0.125),
+        up = anim8.newAnimation(g('1-4', 4), 0.125)
     }
 
     this.sprite.currentAnimation = animations.down
@@ -75,13 +75,8 @@ end
 
 function Player:draw()
     -- Draw sprite
-    self.sprite.currentAnimation:draw(
-        self.sprite.sheet,
-        self.position.x,
-        self.position.y,
-        0, self.sprite.scale,
-        self.sprite.scale
-    )
+    self.sprite.currentAnimation:draw(self.sprite.sheet, self.position.x, self.position.y, 0, self.sprite.scale,
+        self.sprite.scale)
 end
 
 return Player
