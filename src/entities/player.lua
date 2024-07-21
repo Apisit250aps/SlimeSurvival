@@ -10,13 +10,13 @@ function Player:new()
     local this = {
         -- genaral
         position = {
-            x = 100,
-            y = 100
+            x = 0,
+            y = 0
         },
         speed = {
-            min = 100,
-            base = 100,
-            max = 100
+            min = 1,
+            base = 200,
+            max = 3
         },
         health = {
             min = 0,
