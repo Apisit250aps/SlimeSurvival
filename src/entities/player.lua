@@ -15,7 +15,7 @@ function Player:new()
         },
         speed = {
             min = 250,
-            base = 250,
+            base = 500,
             max = 250
         },
         health = {
@@ -35,7 +35,8 @@ function Player:new()
             frameTimer = 0,
             frameDuration = 0.125,
             scale = 1.5
-        }
+        },
+        collider = {}
     }
     -- anim
     local g = anim8.newGrid(32, 32, this.sprite.sheet:getWidth(), this.sprite.sheet:getHeight())
@@ -55,12 +56,12 @@ end
 
 function Player:update(dt)
     self.sprite.currentAnimation:update(dt)
-    
+
     if love.keyboard.isDown("d") then
         self.position.x = self.position.x + self.speed.base * dt
         self.position.y = self.position.y + 1
         self.sprite.currentAnimation = animations.right
-        self.position.y = self.position.y -1
+        self.position.y = self.position.y - 1
     elseif love.keyboard.isDown("a") then
         self.position.x = self.position.x - self.speed.base * dt
         self.sprite.currentAnimation = animations.left
