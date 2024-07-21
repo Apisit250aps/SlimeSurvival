@@ -16,7 +16,7 @@
 ]]
 
 -- Local Utility Functions ---------------------- {{{
-local unpack = table.unpack or unpack
+local unpack = table.unpack
 
 -- Used to handle variable-argument functions and whether they are passed as func{ table } or func( unpack( table ) )
 local function checkInput( ... )

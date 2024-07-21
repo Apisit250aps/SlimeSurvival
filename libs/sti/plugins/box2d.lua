@@ -29,12 +29,12 @@ return {
 
 			if objshape == "polyline" then
 				if #vertices == 4 then
-					shape = love.physics.newEdgeShape(unpack(vertices))
+					shape = love.physics.newEdgeShape(table.unpack(vertices))
 				else
-					shape = love.physics.newChainShape(false, unpack(vertices))
+					shape = love.physics.newChainShape(false, table.unpack(vertices))
 				end
 			else
-				shape = love.physics.newPolygonShape(unpack(vertices))
+				shape = love.physics.newPolygonShape(table.unpack(vertices))
 			end
 
 			local currentBody = body
