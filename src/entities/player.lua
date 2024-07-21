@@ -14,9 +14,9 @@ function Player:new()
             y = 0
         },
         speed = {
-            min = 1,
-            base = 200,
-            max = 3
+            min = 250,
+            base = 250,
+            max = 250
         },
         health = {
             min = 0,
@@ -55,10 +55,12 @@ end
 
 function Player:update(dt)
     self.sprite.currentAnimation:update(dt)
-
+    
     if love.keyboard.isDown("d") then
         self.position.x = self.position.x + self.speed.base * dt
+        self.position.y = self.position.y + 1
         self.sprite.currentAnimation = animations.right
+        self.position.y = self.position.y -1
     elseif love.keyboard.isDown("a") then
         self.position.x = self.position.x - self.speed.base * dt
         self.sprite.currentAnimation = animations.left
