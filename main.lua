@@ -13,7 +13,7 @@ function love.update(dt)
     player:update(dt)
     cam:lookAt(player.position.x, player.position.y)
 
-    enemy:update(dt)
+    enemy:update(player.position.x,player.position.y,dt)
 end
 
 function love.draw()
@@ -25,6 +25,6 @@ function love.draw()
 
     cam:detach()
     --everthing must in cam function
-    
+
     love.graphics.print("position : x = " .. player.position.x .. " y = " .. player.position.y .. " ", 0, 0)
 end

@@ -36,8 +36,19 @@ function Enemy:new()
     return this
 end
 
-function Enemy:update(dt)
-    -- Add any update logic for the enemy here
+function Enemy:update(moveX, moveY, dt)
+    if moveX > self.position.x then
+        self.position.x = self.position.x + self.speed.base * dt
+    else 
+        self.position.x = self.position.x - self.speed.base * dt
+    end
+
+    if moveY > self.position.y then
+        self.position.y = self.position.y + self.speed.base * dt
+    else
+        self.position.y = self.position.y - self.speed.base * dt
+    end
+
 end
 
 function Enemy:draw()

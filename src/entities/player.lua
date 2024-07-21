@@ -59,15 +59,19 @@ function Player:update(dt)
     if love.keyboard.isDown("d") then
         self.position.x = self.position.x + self.speed.base * dt
         self.sprite.currentAnimation = animations.right
+        
     elseif love.keyboard.isDown("a") then
         self.position.x = self.position.x - self.speed.base * dt
         self.sprite.currentAnimation = animations.left
+        
     elseif love.keyboard.isDown("s") then
         self.position.y = self.position.y + self.speed.base * dt
         self.sprite.currentAnimation = animations.down
+        
     elseif love.keyboard.isDown("w") then
         self.position.y = self.position.y - self.speed.base * dt
         self.sprite.currentAnimation = animations.up
+        
     else
         self.sprite.currentAnimation = animations.down
     end
