@@ -51,7 +51,7 @@ end
 
 function World.new(wf, xg, yg, sleep)
     local self = {}
-    local settings = settings or {}
+    settings = settings or {}
     self.wf = wf
 
     self.draw_query_for_n_frames = 10
@@ -301,7 +301,7 @@ function World:generateCategoriesMasks()
                 end
             end
             if key == 'except' then
-                for _, except_ignored_type in ipairs(ignored_type) do
+                for _, except_ignored_type in ipairs(incoming[ignored_type]) do
                     for i, v in ipairs(incoming[except_ignored_type]) do
                         if v == object_type then
                             table.remove(incoming[except_ignored_type], i)
@@ -309,7 +309,7 @@ function World:generateCategoriesMasks()
                         end
                     end
                 end
-                for _, except_ignored_type in ipairs(ignored_type) do
+                for _, except_ignored_type in ipairs(incoming[ignored_type]) do
                     for i, v in ipairs(expanded[object_type]) do
                         if v == except_ignored_type then
                             table.remove(expanded[object_type], i)
@@ -650,7 +650,7 @@ function World:addJoint(joint_type, ...)
     local args = {...}
     if args[1].body then args[1] = args[1].body end
     if type(args[2]) == "table" and args[2].body then args[2] = args[2].body end
-    local joint = love.physics['new' .. joint_type](unpack(args))
+    local joint = love.physics['new' .. joint_type](table.unpack(args))
     return joint
 end
 
@@ -728,7 +728,7 @@ function Collider.new(world, collider_type, ...)
     elseif self.type == 'Polygon' then
         self.collision_class = (args[2] and args[2].collision_class) or 'Default'
         self.body = love.physics.newBody(self.world.box2d_world, 0, 0, (args[2] and args[2].body_type) or 'dynamic')
-        shape = love.physics.newPolygonShape(unpack(args[1]))
+        shape = love.physics.newPolygonShape(table.unpack(args[1]))
 
     elseif self.type == 'Line' then
         self.collision_class = (args[5] and args[5].collision_class) or 'Default'
@@ -738,14 +738,14 @@ function Collider.new(world, collider_type, ...)
     elseif self.type == 'Chain' then
         self.collision_class = (args[3] and args[3].collision_class) or 'Default'
         self.body = love.physics.newBody(self.world.box2d_world, 0, 0, (args[3] and args[3].body_type) or 'dynamic')
-        shape = love.physics.newChainShape(args[1], unpack(args[2]))
+        shape = love.physics.newChainShape(args[1], table.unpack(args[2]))
     end
 
     -- Define collision classes and attach them to fixture and sensor
     fixture = love.physics.newFixture(self.body, shape)
     if self.world.masks[self.collision_class] then
-        fixture:setCategory(unpack(self.world.masks[self.collision_class].categories))
-        fixture:setMask(unpack(self.world.masks[self.collision_class].masks))
+        fixture:setCategory(table.unpack(self.world.masks[self.collision_class].categories))
+        fixture:setMask(table.unpack(self.world.masks[self.collision_class].masks))
     end
     fixture:setUserData(self)
     local sensor = love.physics.newFixture(self.body, shape)
@@ -800,8 +800,8 @@ function Collider:setCollisionClass(collision_class_name)
     self.collision_class = collision_class_name
     for _, fixture in pairs(self.fixtures) do
         if self.world.masks[collision_class_name] then
-            fixture:setCategory(unpack(self.world.masks[collision_class_name].categories))
-            fixture:setMask(unpack(self.world.masks[collision_class_name].masks))
+            fixture:setCategory(table.unpack(self.world.masks[collision_class_name].categories))
+            fixture:setMask(table.unpack(self.world.masks[collision_class_name].masks))
         end
     end
 end
@@ -877,11 +877,11 @@ end
 function Collider:addShape(shape_name, shape_type, ...)
     if self.shapes[shape_name] or self.fixtures[shape_name] then error("Shape/fixture " .. shape_name .. " already exists.") end
     local args = {...}
-    local shape = love.physics['new' .. shape_type](unpack(args))
+    local shape = love.physics['new' .. shape_type](table.unpack(args))
     local fixture = love.physics.newFixture(self.body, shape)
     if self.world.masks[self.collision_class] then
-        fixture:setCategory(unpack(self.world.masks[self.collision_class].categories))
-        fixture:setMask(unpack(self.world.masks[self.collision_class].masks))
+        fixture:setCategory(table.unpack(self.world.masks[self.collision_class].categories))
+        fixture:setMask(table.unpack(self.world.masks[self.collision_class].masks))
     end
     fixture:setUserData(self)
     local sensor = love.physics.newFixture(self.body, shape)
