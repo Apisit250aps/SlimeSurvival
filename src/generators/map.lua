@@ -44,6 +44,7 @@ function Map:draw()
         for y = 1, self.height do
             local tileType = self.map[x][y]
             if tileType then
+                love.graphics.setDefaultFilter("nearest", "nearest")
                 love.graphics.draw(self.tiles[tileType], (x - (self.width / 2)) * self.tileSize, (y - (self.height / 2)) * self.tileSize)
             end
         end

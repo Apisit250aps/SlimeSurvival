@@ -11,7 +11,7 @@ end
 function love.update(dt)
 
     player:update(dt)
-    cam:lockPosition(player.position.x, player.position.y, Camera.smooth.damped(5))
+    cam:lockPosition(player.position.x, player.position.y, Camera.smooth.damped(20))
 
 end
 
@@ -22,7 +22,7 @@ function love.draw()
     player:draw()
     -- 
     cam:detach()
-    love.graphics.print("FPS: "..tostring(love.timer.getFPS( )), 0, 15)
+    love.graphics.print("FPS: "..tostring(love.timer.getFPS()), 0, 15)
     love.graphics.print(
         "position : x = " .. math.floor(player.position.x) .. " y = " .. math.floor(player.position.y) .. " ", 0, 0)
 end
