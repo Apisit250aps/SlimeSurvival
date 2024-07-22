@@ -1,3 +1,4 @@
+---@diagnostic disable: deprecated
 --[[
 The MIT License (MIT)
 
@@ -744,8 +745,8 @@ function Collider.new(world, collider_type, ...)
     -- Define collision classes and attach them to fixture and sensor
     fixture = love.physics.newFixture(self.body, shape)
     if self.world.masks[self.collision_class] then
-        fixture:setCategory(table.unpack(self.world.masks[self.collision_class].categories))
-        fixture:setMask(table.unpack(self.world.masks[self.collision_class].masks))
+        fixture:setCategory(unpack(self.world.masks[self.collision_class].categories))
+        fixture:setMask(unpack(self.world.masks[self.collision_class].masks))
     end
     fixture:setUserData(self)
     local sensor = love.physics.newFixture(self.body, shape)
