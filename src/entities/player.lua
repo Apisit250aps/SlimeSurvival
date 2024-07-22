@@ -68,4 +68,6 @@ function Player:draw()
         self.sprite.scale)
 end
 
+
+
 return Player
