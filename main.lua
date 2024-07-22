@@ -18,7 +18,12 @@ function love.update(dt)
     player:update(dt)
     cam:lookAt(player.position.x, player.position.y)
     enemy:update(player.position.x, player.position.y, dt)
+    enemy:update(player.position.x, player.position.y, dt)
 
+    -- Check for collision and reduce player health
+    if math.abs(player.position.x - enemy.position.x) < 5 and math.abs(player.position.y - enemy.position.y) < 5 then
+        player.health.base = player.health.base - 1 * dt
+    end
     -- Check for collision and reduce player health
     if math.abs(player.position.x - enemy.position.x) < 5 and math.abs(player.position.y - enemy.position.y) < 5 then
         player.health.base = player.health.base - 1 * dt
