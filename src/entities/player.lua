@@ -35,8 +35,12 @@ function Player:new()
             frameTimer = 0,
             frameDuration = 0.125,
             scale = 1.5
-        }
+        },
+
     }
+
+
+
     -- anim
     local g = anim8.newGrid(32, 32, this.sprite.sheet:getWidth(), this.sprite.sheet:getHeight())
     animations = {
@@ -82,5 +86,7 @@ function Player:draw()
     self.sprite.currentAnimation:draw(self.sprite.sheet, self.position.x, self.position.y, 0, self.sprite.scale,
         self.sprite.scale)
 end
+
+
 
 return Player
