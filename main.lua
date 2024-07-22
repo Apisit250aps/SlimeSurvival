@@ -1,11 +1,12 @@
 local Camera = require "libs.hump.camera"
 local Player = require "src.entities.player"
 local Enemy = require "src.entities.enemy"
+local Map = require "src.generators.map"
 
 function love.load()
     player = Player:new()
     cam = Camera(love.graphics.getWidth() / 2, love.graphics.getHeight() / 2)
-
+    map = Map:new(96, 96, 32)
     enemy = Enemy:new()
 end
 
@@ -13,13 +14,13 @@ function love.update(dt)
 
     player:update(dt)
     cam:lookAt(player.position.x, player.position.y)
-
+    
     enemy:update(player.position.x,player.position.y,dt)
 end
 
 function love.draw()
     cam:attach()
-
+    map:draw()
     enemy:draw()
     player:draw()
 
