@@ -1,22 +1,18 @@
 local anim8 = require 'libs.anim8'
-local winf = require "libs.windfield"
 
 local Enemy = {}
 Enemy.__index = Enemy
 
-local animations
-local world -- Global world variable within this module
-
 -- Constructor for the Enemy class
 function Enemy:new()
     love.graphics.setDefaultFilter("nearest", "nearest")
-    world = winf.newWorld(0, 0)
+    
 
     local self = setmetatable({}, Enemy)
 
 
-    self.collider = world:newBSGRectangleCollider(200, 200, 32, 32, 10)
-    self.position = { x = self.collider:getX(), y = self.collider:getY() }
+    
+    self.position = { x = 0, y = 0 }
 
 
     self.speed = {
@@ -41,7 +37,7 @@ function Enemy:new()
         size = 32
     }
 
-    self.collider:setFixedRotation(true)
+    
 
     local g = anim8.newGrid(self.sprite.size, self.sprite.size, self.sprite.sheet:getWidth(),
         self.sprite.sheet:getHeight())
@@ -73,18 +69,16 @@ function Enemy:update(moveX, moveY, dt)
         self.position.y = self.position.y - self.speed.base * dt
     end
 
-    -- Update collider position to match the enemy position
-    self.collider:setPosition(self.position.x + self.sprite.size / 2, self.position.y + self.sprite.size / 2)
     self.sprite.currentAnimation:update(dt)
 end
 
 -- Draw function to render the enemy sprite
 function Enemy:draw()
     -- Draw sprite
-    world:draw()
+  
     self.sprite.currentAnimation:draw(self.sprite.sheet, self.position.x, self.position.y, 0, self.sprite.scale,
         self.sprite.scale)
-    world:draw()
+  
 end
 
 return Enemy
