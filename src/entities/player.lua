@@ -14,12 +14,32 @@ function Player:new()
     local self = setmetatable({}, Player)
 
     -- Collider setup
-    self.collider = world:newBSGRectangleCollider(100,100, 32, 32,10)
+    self.collider = world:newBSGRectangleCollider(100, 100, 32, 32, 10)
+    
     -- General properties
-    self.position = { x = self.collider:getX(), y = self.collider:getY() }
-    self.speed = { min = 250, base = 500, max = 250 }
-    self.health = { min = 0, base = 100, max = 100 }
-    self.stamina = { min = 0, base = 100, max = 100 }
+    self.position = {
+        x = self.collider:getX(),
+        y = self.collider:getY()
+    }
+    self.velocity = {
+        x = 0,
+        y = 0
+    }
+    self.speed = {
+        min = 250,
+        base = 500,
+        max = 250
+    }
+    self.health = {
+        min = 0,
+        base = 100,
+        max = 100
+    }
+    self.stamina = {
+        min = 0,
+        base = 100,
+        max = 100
+    }
 
     -- Sprite and animation setup
     self.sprite = {
@@ -52,21 +72,29 @@ function Player:update(dt)
     world:update(dt)
     self.sprite.currentAnimation:update(dt)
 
+    -- Reset velocity
+    self.velocity.x = 0
+    self.velocity.y = 0
+
     if love.keyboard.isDown("d") then
-        self.position.x = self.position.x + self.speed.base * dt
+        self.velocity.x = self.speed.base
         self.sprite.currentAnimation = self.animations.right
     elseif love.keyboard.isDown("a") then
-        self.position.x = self.position.x - self.speed.base * dt
+        self.velocity.x = -self.speed.base
         self.sprite.currentAnimation = self.animations.left
     elseif love.keyboard.isDown("s") then
-        self.position.y = self.position.y + self.speed.base * dt
+        self.velocity.y = self.speed.base
         self.sprite.currentAnimation = self.animations.down
     elseif love.keyboard.isDown("w") then
-        self.position.y = self.position.y - self.speed.base * dt
+        self.velocity.y = -self.speed.base
         self.sprite.currentAnimation = self.animations.up
     else
         self.sprite.currentAnimation = self.animations.down
     end
+
+    -- Update position with velocity
+    self.position.x = self.position.x + self.velocity.x * dt
+    self.position.y = self.position.y + self.velocity.y * dt
 
     -- Update collider position
     self.collider:setPosition(self.position.x + self.sprite.size / 2, self.position.y + self.sprite.size / 2)
