@@ -15,13 +15,14 @@ end
 -- Update function
 function love.update(dt)
     player:update(dt)
-    cam:lookAt(player.position.x, player.position.y)
+    cam:lookAt(player.collider:getX(), player.collider:getY())
     map:update(dt)
 end
 
 -- Draw function
 function love.draw()
     cam:attach()
+
     map:draw()
     player:draw()
 

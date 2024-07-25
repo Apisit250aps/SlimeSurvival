@@ -729,7 +729,7 @@ function Collider.new(world, collider_type, ...)
     elseif self.type == 'Polygon' then
         self.collision_class = (args[2] and args[2].collision_class) or 'Default'
         self.body = love.physics.newBody(self.world.box2d_world, 0, 0, (args[2] and args[2].body_type) or 'dynamic')
-        shape = love.physics.newPolygonShape(table.unpack(args[1]))
+        shape = love.physics.newPolygonShape(unpack(args[1]))
 
     elseif self.type == 'Line' then
         self.collision_class = (args[5] and args[5].collision_class) or 'Default'
@@ -739,7 +739,7 @@ function Collider.new(world, collider_type, ...)
     elseif self.type == 'Chain' then
         self.collision_class = (args[3] and args[3].collision_class) or 'Default'
         self.body = love.physics.newBody(self.world.box2d_world, 0, 0, (args[3] and args[3].body_type) or 'dynamic')
-        shape = love.physics.newChainShape(args[1], table.unpack(args[2]))
+        shape = love.physics.newChainShape(args[1], unpack(args[2]))
     end
 
     -- Define collision classes and attach them to fixture and sensor

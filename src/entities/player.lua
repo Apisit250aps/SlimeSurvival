@@ -9,7 +9,7 @@ function Player:new(world, x, y)
     local self = setmetatable({}, Player)
     self.world = world
 
-    -- Sprite and animation setup
+    -- Sprite และการตั้งค่าแอนิเมชั่น
     self.sprite = {
         sheet = love.graphics.newImage("assets/sprites/entities/player.png"),
         currentAnimation = nil,
@@ -20,14 +20,14 @@ function Player:new(world, x, y)
         size = 32
     }
 
-    -- Initialize collider
-    self.collider = self.world:newRectangleCollider(x, y, self.sprite.size, self.sprite.size)
-    self.collider:setFixedRotation(true) -- Prevent the player from rotating
+    -- สร้างคอลลิเดอร์
+    self.collider = self.world:newBSGRectangleCollider(x, y, self.sprite.size, self.sprite.size, 10)
+    self.collider:setFixedRotation(true) -- ป้องกันไม่ให้ผู้เล่นหมุน
 
-    -- General properties
+    -- คุณสมบัติทั่วไป
     self.position = {
-        x = x,
-        y = y
+        x = self.collider:getX(),
+        y = self.collider:getY(),
     }
     self.velocity = {
         x = 0,
@@ -68,41 +68,39 @@ function Player:update(dt)
     self.world:update(dt)
     self.sprite.currentAnimation:update(dt)
 
-    -- Reset velocity
+    -- รีเซ็ตความเร็ว
     self.velocity.x = 0
     self.velocity.y = 0
 
     if love.keyboard.isDown("d") then
-        self.velocity.x = self.velocity.x + self.speed.base * dt
+        self.velocity.x = self.speed.base
         self.sprite.currentAnimation = self.animations.right
     elseif love.keyboard.isDown("a") then
-        self.velocity.x = self.velocity.x - self.speed.base * dt
+        self.velocity.x = self.speed.base * -1
         self.sprite.currentAnimation = self.animations.left
     elseif love.keyboard.isDown("s") then
-        self.velocity.y = self.velocity.y + self.speed.base * dt
+        self.velocity.y = self.speed.base
         self.sprite.currentAnimation = self.animations.down
     elseif love.keyboard.isDown("w") then
-        self.velocity.y = self.velocity.y - self.speed.base * dt
+        self.velocity.y = self.speed.base * -1
         self.sprite.currentAnimation = self.animations.up
     else
         self.sprite.currentAnimation = self.animations.down
     end
 
-    -- Update collider velocity
-    -- self.collider:setLinearVelocity(self.velocity.x, self.velocity.y)
-
-    -- Sync player position with collider position
-    self.position.x = self.position.x + self.velocity.x
-    self.position.y = self.position.y + self.velocity.y
     self.collider:setLinearVelocity(self.velocity.x, self.velocity.y)
-    self.collider:setPosition(self.position.x + self.sprite.size / 2, self.position.y + self.sprite.size / 2)
+
+    -- ซิงค์ตำแหน่งผู้เล่นกับตำแหน่งของคอลลิเดอร์
+    self.position.x, self.position.y = self.collider:getPosition()
 end
 
 function Player:draw()
-    self.world:draw()
-    self.sprite.currentAnimation:draw(self.sprite.sheet, self.position.x, self.position.y, 0, self.sprite.scale,
+    self.sprite.currentAnimation:draw(self.sprite.sheet, self.position.x - (self.sprite.size / 2),
+        self.position.y - (self.sprite.size / 2),
+        0, self.sprite
+        .scale,
         self.sprite.scale)
-
+    self.world:draw()
 end
 
 return Player

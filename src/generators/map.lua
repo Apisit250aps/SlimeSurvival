@@ -1,10 +1,10 @@
 local wf = require "libs.windfield"
 local Camera = require "libs.hump.camera"
 local Player = require "src.entities.player"
+
 Map = {}
 Map.__index = Map
 
--- Constructor
 function Map:new(width, height, tileSize)
     local self = setmetatable({}, Map)
     self.width = width
@@ -22,13 +22,11 @@ function Map:new(width, height, tileSize)
     self:generateMap()
 
     cam = Camera(love.graphics.getWidth() / 2, love.graphics.getHeight() / 2)
-    -- Initialize Windfield world
     self:createMapBoundaries()
 
     return self
 end
 
--- Map generation
 function Map:generateMap()
     for x = 1, self.width do
         self.map[x] = {}
@@ -47,31 +45,21 @@ function Map:generateMap()
     end
 end
 
--- Create collision boundaries for the map edges
 function Map:createMapBoundaries()
     local halfWidth = (self.width / 2) * self.tileSize
     local halfHeight = (self.height / 2) * self.tileSize
 
-    -- Left boundary
     self.world:newRectangleCollider(-halfWidth, -halfHeight, self.tileSize, self.height * self.tileSize):setType('static')
-    -- Right boundary
-    self.world:newRectangleCollider(halfWidth, -halfHeight, self.tileSize, self.height * self.tileSize):setType('static')
-    -- Top boundary
+    self.world:newRectangleCollider(halfWidth - self.tileSize, -halfHeight, self.tileSize, self.height * self.tileSize):setType('static')
     self.world:newRectangleCollider(-halfWidth, -halfHeight, self.width * self.tileSize, self.tileSize):setType('static')
-    -- Bottom boundary
-    self.world:newRectangleCollider(-halfWidth, halfHeight, self.width * self.tileSize, 1):setType('static')
-    
+    self.world:newRectangleCollider(-halfWidth, halfHeight - self.tileSize, self.width * self.tileSize, self.tileSize):setType('static')
 end
 
--- Update the world
 function Map:update(dt)
     self.world:update(dt)
-   
 end
 
--- Draw the map
 function Map:draw()
-    
     for x = 1, self.width do
         for y = 1, self.height do
             local tileType = self.map[x][y]
