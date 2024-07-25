@@ -21,8 +21,10 @@ function Player:new(world, x, y)
     }
 
     -- สร้างคอลลิเดอร์
+    self.world:addCollisionClass("Player")
     self.collider = self.world:newBSGRectangleCollider(x, y, self.sprite.size, self.sprite.size, 10)
     self.collider:setFixedRotation(true) -- ป้องกันไม่ให้ผู้เล่นหมุน
+    self.collider:setCollisionClass("Player")
 
     -- คุณสมบัติทั่วไป
     self.position = {
@@ -34,7 +36,7 @@ function Player:new(world, x, y)
         y = 0
     }
     self.speed = {
-        min = 250,
+        min = 150,
         base = 200,
         max = 250
     }
@@ -102,17 +104,13 @@ function Player:update(dt)
     end
 
     self.collider:setLinearVelocity(self.velocity.x, self.velocity.y)
-
     -- ซิงค์ตำแหน่งผู้เล่นกับตำแหน่งของคอลลิเดอร์
     self.position.x, self.position.y = self.collider:getPosition()
 end
 
 function Player:draw()
     self.sprite.currentAnimation:draw(self.sprite.sheet, self.position.x - (self.sprite.size / 2),
-        self.position.y - (self.sprite.size / 2),
-        0, self.sprite
-        .scale,
-        self.sprite.scale)
+        self.position.y - (self.sprite.size / 2), 0, self.sprite.scale, self.sprite.scale)
     self.world:draw()
 end
 

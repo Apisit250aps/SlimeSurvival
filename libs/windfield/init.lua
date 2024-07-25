@@ -801,8 +801,8 @@ function Collider:setCollisionClass(collision_class_name)
     self.collision_class = collision_class_name
     for _, fixture in pairs(self.fixtures) do
         if self.world.masks[collision_class_name] then
-            fixture:setCategory(table.unpack(self.world.masks[collision_class_name].categories))
-            fixture:setMask(table.unpack(self.world.masks[collision_class_name].masks))
+            fixture:setCategory(unpack(self.world.masks[collision_class_name].categories))
+            fixture:setMask(unpack(self.world.masks[collision_class_name].masks))
         end
     end
 end
