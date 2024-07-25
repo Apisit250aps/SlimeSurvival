@@ -38,9 +38,9 @@ function Enemy:new(world, x, y)
         y = 0
     }
     self.speed = {
-        min = 50,
-        base = 100,
-        max = 150
+        min = 10,
+        base = 20,
+        max = 20
     }
     self.health = {
         min = 0,
@@ -66,40 +66,41 @@ end
 function Enemy:update(dt)
     self.world:update(dt)
 
-    player.health.base = player.health.base - 1
     self.sprite.currentAnimation:update(dt)
 
     self.velocity.x = 0
     self.velocity.y = 0
 
-    if player.position.x > self.position.x then
+    local direction = true
+
+    if math.floor(player.position.x) > math.floor(self.position.x) then
         self.velocity.x = self.speed.base
     end
-    if player.position.x < self.position.x then
-        self.velocity.x = -self.speed.base
+    if math.floor(player.position.x) < math.floor(self.position.x) then
+        self.velocity.x = self.speed.base * -1
     end
 
-    if player.position.y > self.position.y then
+    if math.floor(player.position.y) > math.floor(self.position.y) then
         self.velocity.y = self.speed.base
     end
-    if player.position.y < self.position.y then
-        self.velocity.y = -self.speed.base
+    if math.floor(player.position.y) < math.floor(self.position.y) then
+        self.velocity.y = self.speed.base * -1
     end
 
     if self.velocity.x > 0 then
         self.sprite.currentAnimation = self.animations.right
     elseif self.velocity.x < 0 then
         self.sprite.currentAnimation = self.animations.left
-    elseif self.velocity.y > 0 then
+    end
+    if self.velocity.y > 0 then
         self.sprite.currentAnimation = self.animations.down
     elseif self.velocity.y < 0 then
         self.sprite.currentAnimation = self.animations.up
-    else
-        self.sprite.currentAnimation = self.animations.down
     end
 
     self.collider:setLinearVelocity(self.velocity.x, self.velocity.y)
     self.position.x, self.position.y = self.collider:getPosition()
+
 
     self:onCollision()
 end
