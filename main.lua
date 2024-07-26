@@ -38,5 +38,5 @@ function love.draw()
     love.graphics.print("E x: " .. enemy.velocity.x .. "", 10, 90)
     love.graphics.print("E y: " .. enemy.velocity.y .. "", 10, 110)
     love.graphics.print("E speed: " .. enemy.speed.base .. "", 10, 130)
-    love.graphics.print("Esan Distant: " .. enemy.distant .. "", 10, 150)
+    love.graphics.print("Esan Distant: " .. math.floor(enemy.distantSquared) .. "", 10, 150)
 end
