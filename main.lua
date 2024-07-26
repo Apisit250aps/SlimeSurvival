@@ -32,7 +32,7 @@ function love.draw()
     cam:detach()
     -- Display player and enemy positions and health
     love.graphics.print(
-    "Player position: x = " .. math.floor(player.position.x) .. " y = " .. math.floor(player.position.y), 10, 10)
+        "Player position: x = " .. math.floor(player.position.x) .. " y = " .. math.floor(player.position.y), 10, 10)
     love.graphics.print("Player HP: " .. math.floor(player.health.base), 10, 50)
     love.graphics.print("Esan blood: " .. math.floor(enemy.health.base) .. "", 10, 70)
     love.graphics.print("E x: " .. enemy.velocity.x .. "", 10, 90)

@@ -49,6 +49,7 @@ function Enemy:new(world, x, y)
 
     self.sprite.currentAnimation = self.animations.down
 
+
     return self
 end
 
@@ -58,7 +59,7 @@ function Enemy:update(dt)
 
     local playerPos = player.position
     local selfPos = self.position
-    local dx = playerPos.x - selfPos.x
+    local dx = playerPos.x - selfPos.x                              
     local dy = playerPos.y - selfPos.y
 
     self.distantSquared = math.sqrt(dx * dx + dy * dy)
@@ -86,6 +87,7 @@ end
 function Enemy:draw()
     self.sprite.currentAnimation:draw(self.sprite.sheet, self.position.x - self.sprite.halfSize,
         self.position.y - self.sprite.halfSize, 0, self.sprite.scale, self.sprite.scale)
+
 end
 
 function Enemy:collision(dt)
@@ -96,10 +98,15 @@ function Enemy:collision(dt)
             self.health.base = self.health.base - dt
         end
     end)
-
     if self.distantSquared > 32 then
         self.speed.base = self.speed.max
     end
+
+    if self.health.base <= 0 then
+        self.world:remove(self.collider)
+        self.toRemove = true
+    end
 end
+
 
 return Enemy
