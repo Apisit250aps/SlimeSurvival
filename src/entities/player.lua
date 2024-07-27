@@ -106,9 +106,11 @@ function Player:update(dt)
 
     -- ซิงค์ตำแหน่งผู้เล่นกับตำแหน่งของคอลลิเดอร์
     self.position.x, self.position.y = self.collider:getPosition()
+    
 end
 
 function Player:draw()
+    self.world:draw()
     self.sprite.currentAnimation:draw(self.sprite.sheet, self.position.x - (self.sprite.size / 2),
         self.position.y - (self.sprite.size / 2), 0, self.sprite.scale, self.sprite.scale)
    

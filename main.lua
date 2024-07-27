@@ -21,7 +21,7 @@ function love.draw()
     cam:attach()
     map:draw()
     player:draw()
-    map:drawRock()
+    
     cam:detach()
     -- Display player and enemy positions and health
     love.graphics.print("Player position: x = " .. math.floor(player.position.x) .. " y = " .. math.floor(player.position.y), 10, 10)
