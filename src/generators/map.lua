@@ -27,6 +27,7 @@ function Map:new(width, height, tileSize)
     self:generateMaze()
 
     cam = Camera(love.graphics.getWidth() / 2, love.graphics.getHeight() / 2)
+    player = Player:new(self.world, 735, 720)
     self:createMapBoundaries()
     self:createObjects()
     return self
@@ -213,9 +214,12 @@ end
 
 function Map:update(dt)
     self.world:update(dt)
+    player:update(dt)
+    cam:lookAt(player.collider:getX(), player.collider:getY())
 end
 
 function Map:draw()
+    cam:attach()
     for x = 1, self.width do
         for y = 1, self.height do
             local tileType = self.map[x][y]
@@ -231,6 +235,9 @@ function Map:draw()
         love.graphics.draw(self.tiles.coin, (coin.x - (self.width / 2)) * self.tileSize,
             (coin.y - (self.height / 2)) * self.tileSize)
     end
+    player:draw()
+    cam:detach()
+
 end
 
 function Map:collectCoin(x, y)
@@ -241,6 +248,7 @@ function Map:collectCoin(x, y)
         end
     end
     return false
+
 end
 
 return Map
