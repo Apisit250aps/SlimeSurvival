@@ -5,8 +5,8 @@ local Map = require "src.generators.map"
 -- Initialization function
 function love.load()
     cam = Camera(love.graphics.getWidth() / 2, love.graphics.getHeight() / 2)
-    map = Map:new(96, 96, 32)
-    player = Player:new(map.world, 0, 0)
+    map = Map:new(48, 48, 32)
+    player = Player:new(map.world, 735, 720)
 end
 
 -- Update function

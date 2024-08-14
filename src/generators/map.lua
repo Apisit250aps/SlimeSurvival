@@ -31,7 +31,6 @@ function Map:new(width, height, tileSize)
     self:createObjects()
     return self
 end
-
 function Map:generateMaze()
     -- Initialize the map with walls (rocks)
     for x = 1, self.width do
@@ -75,6 +74,12 @@ function Map:generateMaze()
         } -- up
         }
 
+        -- Shuffle the directions to increase randomness
+        for i = #directions, 2, -1 do
+            local j = math.random(i)
+            directions[i], directions[j] = directions[j], directions[i]
+        end
+
         for _, dir in ipairs(directions) do
             local nx, ny = x + dir.x, y + dir.y
             if isValid(nx, ny) and not visited[nx][ny] then
@@ -110,6 +115,30 @@ function Map:generateMaze()
         end
     end
 
+    -- Define exit position on one of the edges
+    local exitX, exitY
+    local exitSide = math.random(1, 4)
+    if exitSide == 1 then
+        exitX = 1
+        exitY = 2 * math.random(1, math.floor(self.height / 4)) * 2 - 1
+    elseif exitSide == 2 then
+        exitX = self.width
+        exitY = 2 * math.random(1, math.floor(self.height / 4)) * 2 - 1
+    elseif exitSide == 3 then
+        exitX = 2 * math.random(1, math.floor(self.width / 4)) * 2 - 1
+        exitY = 1
+    else
+        exitX = 2 * math.random(1, math.floor(self.width / 4)) * 2 - 1
+        exitY = self.height
+    end
+
+    -- Ensure exit is on grass
+    for i = -1, 0 do
+        for j = -1, 0 do
+            self.map[exitX + i][exitY + j] = "grass1"
+        end
+    end
+
     while #stack > 0 do
         local current = stack[#stack]
         local neighbors = getNeighbors(current.x, current.y)
@@ -140,6 +169,9 @@ function Map:generateMaze()
             end
         end
     end
+
+    -- Mark the exit for visual purposes (optional)
+    self.map[exitX][exitY] = "flower"
 end
 
 function Map:createObjects()
