@@ -32,6 +32,50 @@ function Map:new(width, height, tileSize)
     self:createObjects()
     return self
 end
+
+
+function Map:update(dt)
+    self.world:update(dt)
+    player:update(dt)
+    cam:lookAt(player.collider:getX(), player.collider:getY())
+
+    -- Check for coin collisions
+    local px, py = player.collider:getPosition()
+    local px1, py1 = px - 16, py - 16 -- Adjust according to player collider size
+
+    for i, coin in ipairs(self.coins) do
+        local cx, cy = (coin.x - (self.width / 2)) * self.tileSize, (coin.y - (self.height / 2)) * self.tileSize
+        if px1 < cx + self.tileSize and px1 + 32 > cx and py1 < cy + self.tileSize and py1 + 32 > cy then
+            if self:collectCoin(coin.x, coin.y) then
+                player:addScore(10) -- Add points for each collected coin
+            end
+        end
+    end
+end
+
+function Map:draw()
+    cam:attach()
+    for x = 1, self.width do
+        for y = 1, self.height do
+            local tileType = self.map[x][y]
+            if tileType then
+                love.graphics.setDefaultFilter("nearest", "nearest")
+                love.graphics.draw(self.tiles[tileType], (x - (self.width / 2)) * self.tileSize,
+                    (y - (self.height / 2)) * self.tileSize)
+            end
+        end
+    end
+
+    for _, coin in ipairs(self.coins) do
+        love.graphics.draw(self.tiles.coin, (coin.x - (self.width / 2)) * self.tileSize,
+            (coin.y - (self.height / 2)) * self.tileSize)
+    end
+    player:draw()
+    cam:detach()
+
+end
+
+
 function Map:generateMaze()
     -- Initialize the map with walls (rocks)
     for x = 1, self.width do
@@ -212,34 +256,6 @@ function Map:createMapBoundaries()
     bottom:setCollisionClass('Wall')
 end
 
-function Map:update(dt)
-    self.world:update(dt)
-    player:update(dt)
-    cam:lookAt(player.collider:getX(), player.collider:getY())
-end
-
-function Map:draw()
-    cam:attach()
-    for x = 1, self.width do
-        for y = 1, self.height do
-            local tileType = self.map[x][y]
-            if tileType then
-                love.graphics.setDefaultFilter("nearest", "nearest")
-                love.graphics.draw(self.tiles[tileType], (x - (self.width / 2)) * self.tileSize,
-                    (y - (self.height / 2)) * self.tileSize)
-            end
-        end
-    end
-
-    for _, coin in ipairs(self.coins) do
-        love.graphics.draw(self.tiles.coin, (coin.x - (self.width / 2)) * self.tileSize,
-            (coin.y - (self.height / 2)) * self.tileSize)
-    end
-    player:draw()
-    cam:detach()
-
-end
-
 function Map:collectCoin(x, y)
     for i, coin in ipairs(self.coins) do
         if coin.x == x and coin.y == y then
@@ -248,7 +264,6 @@ function Map:collectCoin(x, y)
         end
     end
     return false
-
 end
 
 return Map

@@ -20,6 +20,8 @@ function Player:new(world, x, y)
         size = 32
     }
 
+    self.score = 0
+
     -- สร้างคอลลิเดอร์
     self.collider = self.world:newBSGRectangleCollider(x, y, self.sprite.size, self.sprite.size, 10)
     self.collider:setFixedRotation(true) -- ป้องกันไม่ให้ผู้เล่นหมุน
@@ -106,15 +108,18 @@ function Player:update(dt)
 
     -- ซิงค์ตำแหน่งผู้เล่นกับตำแหน่งของคอลลิเดอร์
     self.position.x, self.position.y = self.collider:getPosition()
-    
+
 end
 
 function Player:draw()
     -- self.world:draw()
     self.sprite.currentAnimation:draw(self.sprite.sheet, self.position.x - (self.sprite.size / 2),
         self.position.y - (self.sprite.size / 2), 0, self.sprite.scale, self.sprite.scale)
-   
 
+end
+
+function Player:addScore(amount)
+    self.score = self.score + amount
 end
 
 return Player
