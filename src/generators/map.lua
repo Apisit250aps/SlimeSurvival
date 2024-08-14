@@ -33,7 +33,6 @@ function Map:new(width, height, tileSize)
     return self
 end
 
-
 function Map:update(dt)
     self.world:update(dt)
     player:update(dt)
@@ -74,7 +73,6 @@ function Map:draw()
     cam:detach()
 
 end
-
 
 function Map:generateMaze()
     -- Initialize the map with walls (rocks)
