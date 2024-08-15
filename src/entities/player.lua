@@ -52,6 +52,10 @@ function Player:new(world, x, y)
         max = 100
     }
 
+    self.state = {
+        onMove = false
+    }
+
     local g = anim8.newGrid(self.sprite.size, self.sprite.size, self.sprite.sheet:getWidth(),
         self.sprite.sheet:getHeight())
 
@@ -102,6 +106,12 @@ function Player:update(dt)
     end
     if self.velocity.x == 0 and self.velocity.y == 0 then
         self.sprite.currentAnimation = self.animations.down
+    end
+
+    if self.velocity.x ~= 0 and self.velocity.y ~= 0 then
+        self.state.onMove = true
+    else
+        self.state.onMove = false
     end
 
     self.collider:setLinearVelocity(self.velocity.x, self.velocity.y)

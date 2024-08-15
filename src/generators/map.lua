@@ -1,7 +1,7 @@
 local wf = require "libs.windfield"
 local Camera = require "libs.hump.camera"
 local Player = require "src.entities.player"
-
+local SoundsPlay = require "src.utils.sound"
 Map = {}
 Map.__index = Map
 
@@ -28,6 +28,7 @@ function Map:new(width, height, tileSize)
 
     cam = Camera(love.graphics.getWidth() / 2, love.graphics.getHeight() / 2)
     player = Player:new(self.world, self:randomPlayerSpawn())
+
     self:createMapBoundaries()
     self:createObjects()
 
@@ -35,7 +36,8 @@ function Map:new(width, height, tileSize)
     self.score = 0
     self.timer = 30
     self.gameOver = false
-
+    self.sound = SoundsPlay:new()
+    self.sound.src.gameStart:play()
     self:loadHighScore() -- Load the high score
 
     return self
@@ -47,7 +49,10 @@ function Map:randomPlayerSpawn()
     for x = 1, self.width do
         for y = 1, self.height do
             if self.map[x][y]:find("grass") then
-                table.insert(validTiles, { x = x, y = y })
+                table.insert(validTiles, {
+                    x = x,
+                    y = y
+                })
             end
         end
     end
@@ -62,6 +67,9 @@ function Map:update(dt)
 
     self.world:update(dt)
     player:update(dt)
+    if player.state.onMove then
+        self.sound.src.slimeWalk:play()
+    end
     cam:lookAt(player.collider:getX(), player.collider:getY())
 
     -- Decrease timer
@@ -81,14 +89,22 @@ function Map:update(dt)
         if px1 < cx + self.tileSize and px1 + 32 > cx and py1 < cy + self.tileSize and py1 + 32 > cy then
             if self:collectCoin(coin.x, coin.y) then
                 ranScore = math.random(50, 70)
-                player:addScore(ranScore)          -- Add points for each collected coin
+                player:addScore(ranScore) -- Add points for each collected coin
                 self.score = self.score + ranScore -- Update score
             end
         end
     end
     if self.gameOver and self.score > self.highScore then
         self.highScore = self.score
+        self.sound.src.gameOver:play()
         self:saveHighScore() -- Save the new high score
+    else
+        self.sound.src.gameOver:stop()
+    end
+    if self.gameOver then
+        self.sound.src.gameOver:play()
+    else
+        self.sound.src.gameOver:stop()
     end
 end
 
@@ -183,10 +199,22 @@ function Map:generateMaze()
 
     local function getNeighbors(x, y)
         local neighbors = {}
-        local directions = { { x = 4, y = 0 }, -- right
-            { x = -4, y = 0 },                 -- left
-            { x = 0,  y = 4 },                 -- down
-            { x = 0,  y = -4 }                 -- up
+        local directions = {{
+            x = 4,
+            y = 0
+        }, -- right
+        {
+            x = -4,
+            y = 0
+        }, -- left
+        {
+            x = 0,
+            y = 4
+        }, -- down
+        {
+            x = 0,
+            y = -4
+        } -- up
         }
 
         -- Shuffle the directions to increase randomness
@@ -198,7 +226,10 @@ function Map:generateMaze()
         for _, dir in ipairs(directions) do
             local nx, ny = x + dir.x, y + dir.y
             if isValid(nx, ny) and not visited[nx][ny] then
-                table.insert(neighbors, { x = nx, y = ny })
+                table.insert(neighbors, {
+                    x = nx,
+                    y = ny
+                })
             end
         end
         return neighbors
@@ -216,7 +247,10 @@ function Map:generateMaze()
     -- Start from a random position
     local startX, startY = 2 * math.random(1, math.floor(self.width / 4)) * 2 - 1,
         2 * math.random(1, math.floor(self.height / 4)) * 2 - 1
-    table.insert(stack, { x = startX, y = startY })
+    table.insert(stack, {
+        x = startX,
+        y = startY
+    })
     visited[startX][startY] = true
     for i = -1, 0 do
         for j = -1, 0 do
@@ -308,23 +342,28 @@ function Map:createObjects()
 end
 
 function Map:createWall(x, y)
-    local wall = self.world:newRectangleCollider(
-        (x - (self.width / 2)) * self.tileSize,
-        (y - (self.height / 2)) * self.tileSize,
-        self.tileSize, self.tileSize
-    )
+    local wall = self.world:newRectangleCollider((x - (self.width / 2)) * self.tileSize,
+        (y - (self.height / 2)) * self.tileSize, self.tileSize, self.tileSize)
     wall:setType("static")
     wall:setCollisionClass("Wall")
 end
 
 function Map:createCoin(x, y)
-    table.insert(self.coins, { x = x, y = y })
+    table.insert(self.coins, {
+        x = x,
+        y = y
+    })
 end
 
 function Map:collectCoin(x, y)
+
     for i, coin in ipairs(self.coins) do
         if coin.x == x and coin.y == y then
+            local coinSound = self.sound.src.coinSound:clone()
+            coinSound:play()
+
             table.remove(self.coins, i)
+
             return true
         end
     end
