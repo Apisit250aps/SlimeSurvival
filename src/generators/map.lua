@@ -30,7 +30,7 @@ function Map:new(width, height, tileSize)
 
     cam = Camera(love.graphics.getWidth() / 2, love.graphics.getHeight() / 2)
     player = Player:new(self.world, self:randomPlayerSpawn())
-    enemy = Enemy:new() -- Create the enemy instance
+    
     self:createMapBoundaries()
     self:createObjects()
 
@@ -93,7 +93,7 @@ function Map:update(dt)
         until math.sqrt((player.collider:getX() - spawnX) ^ 2 + (player.collider:getY() - spawnY) ^ 2) > math.random(800, 3200)
 
         -- Create the enemy instance at the valid position
-        local newEnemy = Enemy:new(self.world, spawnX, spawnY)
+        local newEnemy = Enemy:new(spawnX, spawnY)
         table.insert(self.enemies, newEnemy)
         self.enemiesQuntity = self.enemiesQuntity + 1
     end
@@ -101,6 +101,8 @@ function Map:update(dt)
     -- Update all enemies and check for collisions with the player
     for i, enemy in ipairs(self.enemies) do
         enemy:update(player.position.x, player.position.y, dt)
+
+        
 
         -- Check for collision with the player
         if self:checkCollision(player.position, enemy.position) then
@@ -130,13 +132,10 @@ function Map:update(dt)
     self.timer = self.timer + dt
 
 
-    -- Update enemy to follow the player
-    enemy:update(player.position.x, player.position.y, dt)
+    
 
     -- Check for collision between player and enemy
-    if self:checkCollision(player.position, enemy.position) then
-        self.gameOver = true
-    end
+    
 
     cam:lookAt(player.collider:getX(), player.collider:getY())
 

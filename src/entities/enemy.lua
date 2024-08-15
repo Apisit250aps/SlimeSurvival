@@ -4,7 +4,7 @@ local Enemy = {}
 Enemy.__index = Enemy
 
 -- Constructor for the Enemy class
-function Enemy:new()
+function Enemy:new( x, y)
     love.graphics.setDefaultFilter("nearest", "nearest")
 
 
@@ -12,7 +12,7 @@ function Enemy:new()
 
 
 
-    self.position = { x = 0, y = 0 }
+    self.position = { x = x, y = y }
 
 
     self.speed = {
