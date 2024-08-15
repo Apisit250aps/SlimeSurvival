@@ -16,9 +16,9 @@ function Enemy:new(x, y)
 
 
     self.speed = {
-        min = 90,
+        min = 70,
         base = 90,
-        max = 160
+        max = 110
     }
 
     self.health = {
@@ -55,7 +55,7 @@ end
 
 -- Update function to move the enemy towards the target position
 function Enemy:update(moveX, moveY, dt)
-    self.speed.base = love.math.random(self.speed.min, self.speed.max, 10)
+    self.speed.base = love.math.random(self.speed.min, self.speed.max)
     -- Move in the X direction
     if moveX > self.position.x then
         self.position.x = self.position.x + self.speed.base * dt

@@ -7,6 +7,10 @@ local SoundsPlay = require "src.utils.sound"
 Map = {}
 Map.__index = Map
 
+alagard_min = love.graphics.newFont("assets/alagard.ttf", 24)
+alagard_mid = love.graphics.newFont("assets/alagard.ttf", 36)
+alagard_max = love.graphics.newFont("assets/alagard.ttf", 48)
+
 function Map:new(width, height, tileSize)
     local self = setmetatable({}, Map)
     self.width = width
@@ -202,22 +206,31 @@ function Map:draw()
 
     cam:detach() -- Only one cam:detach() is needed here
 
-    -- Draw score and timer
+    -- Draw score and timer UI with borders
     love.graphics.setColor(1, 1, 1)
-    love.graphics.setFont(love.graphics.newFont(16))
-    love.graphics.print("High Score: " .. math.ceil(self.highScore), 10, 10)
-    love.graphics.print("Coins: " .. self.coin, 10, 30)
-    love.graphics.print("Time: " .. math.ceil(self.timer), 10, 50)
-    love.graphics.print("Enemy: " .. self.enemiesQuntity, 10, 70)
+    love.graphics.setFont(alagard_min)
+
+    -- Draw a rectangle for the UI
+    local uiX, uiY, uiWidth, uiHeight = 5, 5, 200, 100
+    love.graphics.setColor(0, 0, 0, 0.7) -- Semi-transparent black for the background
+    love.graphics.rectangle("fill", uiX, uiY, uiWidth, uiHeight)
+    love.graphics.setColor(1, 1, 1)      -- White for the border
+    love.graphics.rectangle("line", uiX, uiY, uiWidth, uiHeight)
+
+    -- Print the text inside the rectangle
+    love.graphics.print("High Score: " .. math.ceil(self.highScore), uiX + 10, uiY + 10)
+    love.graphics.print("Coins: " .. self.coin, uiX + 10, uiY + 30)
+    love.graphics.print("Time: " .. math.ceil(self.timer), uiX + 10, uiY + 50)
+    love.graphics.print("Enemy: " .. self.enemiesQuntity, uiX + 10, uiY + 70)
 
     -- Draw game over screen if the game is over
     if self.gameOver then
         love.graphics.setColor(0, 0, 0, 0.7)
         love.graphics.rectangle("fill", 0, 0, love.graphics.getWidth(), love.graphics.getHeight())
         love.graphics.setColor(1, 1, 1)
-        love.graphics.setFont(love.graphics.newFont(48))
+        love.graphics.setFont(alagard_max)
         love.graphics.printf("Game Over", 0, love.graphics.getHeight() / 2 - 50, love.graphics.getWidth(), "center")
-        love.graphics.setFont(love.graphics.newFont(36))
+        love.graphics.setFont(alagard_mid)
         love.graphics.printf("Final Score: " .. math.ceil(self.score), 0, love.graphics.getHeight() / 2 + 10,
             love.graphics.getWidth(), "center")
         love.graphics.printf("Press R to Restart", 0, love.graphics.getHeight() / 2 + 120, love.graphics.getWidth(),
@@ -254,6 +267,7 @@ function Map:reset()
     self.score = 0
     self.timer = 0
     self.gameOver = false
+    self.coin = 0
 
     self.enemies = {}
     self.enemySpawnTimer = 0
