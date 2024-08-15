@@ -21,8 +21,8 @@ function Map:new(width, height, tileSize)
         grass2 = love.graphics.newImage("assets/sprites/tiles/grass2.png"),
         grass3 = love.graphics.newImage("assets/sprites/tiles/grass3.png"),
         flower = love.graphics.newImage("assets/sprites/tiles/flower.png"),
-        rock = love.graphics.newImage("assets/sprites/tiles/rock.png"),
-        coin = love.graphics.newImage("assets/sprites/tiles/coin.png")
+        rock = love.graphics.newImage("assets/sprites/tiles/stone.png"),
+        coin = love.graphics.newImage("assets/sprites/tiles/pudding.png")
     }
     self.map = {}
     self.coins = {}
