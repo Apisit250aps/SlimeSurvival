@@ -27,16 +27,50 @@ function Map:new(width, height, tileSize)
     self:generateMaze()
 
     cam = Camera(love.graphics.getWidth() / 2, love.graphics.getHeight() / 2)
-    player = Player:new(self.world, 735, 720)
+    player = Player:new(self.world, self:randomPlayerSpawn())
     self:createMapBoundaries()
     self:createObjects()
+
+    -- Initialize score and timer
+    self.score = 0
+    self.timer = 30
+    self.gameOver = false
+
+    self:loadHighScore() -- Load the high score
+
     return self
 end
 
+function Map:randomPlayerSpawn()
+    -- Find a random grass tile for player spawn
+    local validTiles = {}
+    for x = 1, self.width do
+        for y = 1, self.height do
+            if self.map[x][y]:find("grass") then
+                table.insert(validTiles, { x = x, y = y })
+            end
+        end
+    end
+    local spawnTile = validTiles[math.random(#validTiles)]
+    return (spawnTile.x - (self.width / 2)) * self.tileSize, (spawnTile.y - (self.height / 2)) * self.tileSize
+end
+
 function Map:update(dt)
+    if self.gameOver then
+        return
+    end
+
     self.world:update(dt)
     player:update(dt)
     cam:lookAt(player.collider:getX(), player.collider:getY())
+
+    -- Decrease timer
+    if self.timer > 0 then
+        self.timer = self.timer - dt
+    else
+        self.timer = 0
+        self.gameOver = true
+    end
 
     -- Check for coin collisions
     local px, py = player.collider:getPosition()
@@ -46,9 +80,15 @@ function Map:update(dt)
         local cx, cy = (coin.x - (self.width / 2)) * self.tileSize, (coin.y - (self.height / 2)) * self.tileSize
         if px1 < cx + self.tileSize and px1 + 32 > cx and py1 < cy + self.tileSize and py1 + 32 > cy then
             if self:collectCoin(coin.x, coin.y) then
-                player:addScore(10) -- Add points for each collected coin
+                ranScore = math.random(50, 70)
+                player:addScore(ranScore)          -- Add points for each collected coin
+                self.score = self.score + ranScore -- Update score
             end
         end
+    end
+    if self.gameOver and self.score > self.highScore then
+        self.highScore = self.score
+        self:saveHighScore() -- Save the new high score
     end
 end
 
@@ -72,6 +112,50 @@ function Map:draw()
     player:draw()
     cam:detach()
 
+    -- Draw score and timer
+    love.graphics.setColor(1, 1, 1)
+    love.graphics.setFont(love.graphics.newFont(16))
+    love.graphics.print("High Score: " .. self.highScore, 10, 10)
+    love.graphics.print("Score: " .. self.score, 10, 30)
+    love.graphics.print("Time: " .. math.ceil(self.timer), 10, 50)
+
+    -- Draw game over screen if the game is over
+    if self.gameOver then
+        love.graphics.setColor(0, 0, 0, 0.7)
+        love.graphics.rectangle("fill", 0, 0, love.graphics.getWidth(), love.graphics.getHeight())
+        love.graphics.setColor(1, 1, 1)
+        love.graphics.setFont(love.graphics.newFont(48)) -- ขนาดตัวอักษรใหญ่ขึ้น
+        love.graphics.printf("Game Over", 0, love.graphics.getHeight() / 2 - 50, love.graphics.getWidth(), "center")
+        love.graphics.setFont(love.graphics.newFont(36)) -- ขนาดตัวอักษรใหญ่ขึ้นสำหรับคะแนน
+        love.graphics.printf("Final Score: " .. self.score, 0, love.graphics.getHeight() / 2 + 10,
+            love.graphics.getWidth(), "center")
+        love.graphics.printf("Press R to Restart", 0, love.graphics.getHeight() / 2 + 60, love.graphics.getWidth(),
+            "center")
+    end
+end
+
+function Map:keypressed(key)
+    if key == "r" and self.gameOver then
+        self:reset()
+    end
+end
+
+function Map:reset()
+    self.coins = {}
+    self.map = {}
+    self.world:destroy()
+    self.world = wf.newWorld(0, 0, true)
+    self.world:addCollisionClass("Wall")
+    self.world:addCollisionClass("Coin")
+    self:generateMaze()
+    player = Player:new(self.world, self:randomPlayerSpawn())
+    self:createMapBoundaries()
+    self:createObjects()
+
+    -- Reset score, timer and game state
+    self.score = 0
+    self.timer = 30
+    self.gameOver = false
 end
 
 function Map:generateMaze()
@@ -99,22 +183,10 @@ function Map:generateMaze()
 
     local function getNeighbors(x, y)
         local neighbors = {}
-        local directions = {{
-            x = 4,
-            y = 0
-        }, -- right
-        {
-            x = -4,
-            y = 0
-        }, -- left
-        {
-            x = 0,
-            y = 4
-        }, -- down
-        {
-            x = 0,
-            y = -4
-        } -- up
+        local directions = { { x = 4, y = 0 }, -- right
+            { x = -4, y = 0 },                 -- left
+            { x = 0,  y = 4 },                 -- down
+            { x = 0,  y = -4 }                 -- up
         }
 
         -- Shuffle the directions to increase randomness
@@ -126,10 +198,7 @@ function Map:generateMaze()
         for _, dir in ipairs(directions) do
             local nx, ny = x + dir.x, y + dir.y
             if isValid(nx, ny) and not visited[nx][ny] then
-                table.insert(neighbors, {
-                    x = nx,
-                    y = ny
-                })
+                table.insert(neighbors, { x = nx, y = ny })
             end
         end
         return neighbors
@@ -147,10 +216,7 @@ function Map:generateMaze()
     -- Start from a random position
     local startX, startY = 2 * math.random(1, math.floor(self.width / 4)) * 2 - 1,
         2 * math.random(1, math.floor(self.height / 4)) * 2 - 1
-    table.insert(stack, {
-        x = startX,
-        y = startY
-    })
+    table.insert(stack, { x = startX, y = startY })
     visited[startX][startY] = true
     for i = -1, 0 do
         for j = -1, 0 do
@@ -170,88 +236,89 @@ function Map:generateMaze()
     elseif exitSide == 3 then
         exitX = 2 * math.random(1, math.floor(self.width / 4)) * 2 - 1
         exitY = 1
-    else
+    elseif exitSide == 4 then
         exitX = 2 * math.random(1, math.floor(self.width / 4)) * 2 - 1
         exitY = self.height
-    end
-
-    -- Ensure exit is on grass
-    for i = -1, 0 do
-        for j = -1, 0 do
-            self.map[exitX + i][exitY + j] = "grass1"
-        end
     end
 
     while #stack > 0 do
         local current = stack[#stack]
         local neighbors = getNeighbors(current.x, current.y)
-
         if #neighbors > 0 then
-            local next = neighbors[math.random(#neighbors)]
-            removeWall(current.x, current.y, next.x, next.y)
-            visited[next.x][next.y] = true
+            local nextCell = neighbors[math.random(#neighbors)]
+            removeWall(current.x, current.y, nextCell.x, nextCell.y)
+            table.insert(stack, nextCell)
+            visited[nextCell.x][nextCell.y] = true
             for i = -1, 0 do
                 for j = -1, 0 do
-                    self.map[next.x + i][next.y + j] = "grass1"
+                    self.map[nextCell.x + i][nextCell.y + j] = "grass1"
                 end
             end
-            table.insert(stack, next)
         else
             table.remove(stack)
         end
     end
 
-    -- Generate coins on grass tiles
-    for x = 1, self.width do
-        for y = 1, self.height do
-            if self.map[x][y]:find("grass") and math.random() < 0.05 then
-                table.insert(self.coins, {
-                    x = x,
-                    y = y
-                })
-            end
-        end
-    end
-
-    -- Mark the exit for visual purposes (optional)
-    self.map[exitX][exitY] = "flower"
-end
-
-function Map:createObjects()
-    for x = 1, self.width do
-        for y = 1, self.height do
-            local tileType = self.map[x][y]
-            if tileType == "rock" then
-                wall = self.world:newRectangleCollider((x - (self.width / 2)) * self.tileSize,
-                    (y - (self.width / 2)) * self.tileSize, self.tileSize, self.tileSize)
-                wall:setType('static')
-                wall:setCollisionClass('Wall')
-            end
-        end
-    end
+    -- Create exit path
+    self.map[exitX][exitY] = "grass1"
 end
 
 function Map:createMapBoundaries()
-    local halfWidth = (self.width / 2) * self.tileSize
-    local halfHeight = (self.height / 2) * self.tileSize
+    -- Add invisible walls to the edges of the map
+    local wallThickness = 1
+    -- Left boundary
+    local leftWall = self.world:newRectangleCollider(-(self.width / 2) * self.tileSize - wallThickness,
+        -(self.height / 2) * self.tileSize, wallThickness, self.height * self.tileSize)
+    leftWall:setType("static")
+    leftWall:setCollisionClass("Wall")
 
-    local left = self.world:newRectangleCollider(-halfWidth, -halfHeight, self.tileSize,
-        self.height * self.tileSize + (self.tileSize * 2))
-    local right = self.world:newRectangleCollider(halfWidth + self.tileSize, -halfHeight, self.tileSize,
-        self.height * self.tileSize + (self.tileSize * 2))
-    local top = self.world:newRectangleCollider(-halfWidth + self.tileSize, -halfHeight, self.width * self.tileSize,
-        self.tileSize)
-    local bottom = self.world:newRectangleCollider(-halfWidth + self.tileSize, halfHeight + self.tileSize,
-        self.width * self.tileSize, self.tileSize)
+    -- Right boundary
+    local rightWall = self.world:newRectangleCollider((self.width / 2) * self.tileSize,
+        -(self.height / 2) * self.tileSize, wallThickness, self.height * self.tileSize)
+    rightWall:setType("static")
+    rightWall:setCollisionClass("Wall")
 
-    left:setType('static')
-    left:setCollisionClass('Wall')
-    top:setType('static')
-    top:setCollisionClass('Wall')
-    right:setType('static')
-    right:setCollisionClass('Wall')
-    bottom:setType('static')
-    bottom:setCollisionClass('Wall')
+    -- Top boundary
+    local topWall = self.world:newRectangleCollider(-(self.width / 2) * self.tileSize,
+        -(self.height / 2) * self.tileSize - wallThickness, self.width * self.tileSize, wallThickness)
+    topWall:setType("static")
+    topWall:setCollisionClass("Wall")
+
+    -- Bottom boundary
+    local bottomWall = self.world:newRectangleCollider(-(self.width / 2) * self.tileSize,
+        (self.height / 2) * self.tileSize, self.width * self.tileSize, wallThickness)
+    bottomWall:setType("static")
+    bottomWall:setCollisionClass("Wall")
+end
+
+function Map:createObjects()
+    -- Create walls and coins based on the map
+    for x = 1, self.width do
+        for y = 1, self.height do
+            if self.map[x][y] == "rock" then
+                self:createWall(x, y)
+            elseif self.map[x][y]:find("grass") then
+                -- Randomly place coins on grass tiles
+                if math.random() < 0.1 then
+                    self:createCoin(x, y)
+                end
+            end
+        end
+    end
+end
+
+function Map:createWall(x, y)
+    local wall = self.world:newRectangleCollider(
+        (x - (self.width / 2)) * self.tileSize,
+        (y - (self.height / 2)) * self.tileSize,
+        self.tileSize, self.tileSize
+    )
+    wall:setType("static")
+    wall:setCollisionClass("Wall")
+end
+
+function Map:createCoin(x, y)
+    table.insert(self.coins, { x = x, y = y })
 end
 
 function Map:collectCoin(x, y)
@@ -262,6 +329,19 @@ function Map:collectCoin(x, y)
         end
     end
     return false
+end
+
+function Map:loadHighScore()
+    local file = love.filesystem.read("highscore.txt")
+    if file then
+        self.highScore = tonumber(file)
+    else
+        self.highScore = 0
+    end
+end
+
+function Map:saveHighScore()
+    love.filesystem.write("highscore.txt", tostring(self.highScore))
 end
 
 return Map

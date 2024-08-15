@@ -4,7 +4,7 @@ function love.conf(t)
     t.window.icon = "assets/icon/SlimeIcon.png"
     t.window.width = 800        -- ความกว้างหน้าต่าง (ไม่จำเป็นในโหมด fullscreen)
     t.window.height = 600       -- ความสูงหน้าต่าง (ไม่จำเป็นในโหมด fullscreen)
-    t.window.fullscreen = false  -- เปิดโหมด fullscreen
+    t.window.fullscreen = true  -- เปิดโหมด fullscreen
 
 
     -- 
