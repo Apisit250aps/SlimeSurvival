@@ -30,7 +30,7 @@ function Map:new(width, height, tileSize)
 
     cam = Camera(love.graphics.getWidth() / 2, love.graphics.getHeight() / 2)
     player = Player:new(self.world, self:randomPlayerSpawn())
-    
+
     self:createMapBoundaries()
     self:createObjects()
 
@@ -102,7 +102,7 @@ function Map:update(dt)
     for i, enemy in ipairs(self.enemies) do
         enemy:update(player.position.x, player.position.y, dt)
 
-        
+
 
         -- Check for collision with the player
         if self:checkCollision(player.position, enemy.position) then
@@ -132,10 +132,10 @@ function Map:update(dt)
     self.timer = self.timer + dt
 
 
-    
+
 
     -- Check for collision between player and enemy
-    
+
 
     cam:lookAt(player.collider:getX(), player.collider:getY())
 
@@ -233,6 +233,8 @@ end
 function Map:keypressed(key)
     if key == "r" and self.gameOver then
         self:reset()
+    elseif key == "q" and self.gameOver then
+        love.window.close()
     end
 end
 
@@ -283,22 +285,22 @@ function Map:generateMaze()
 
     local function getNeighbors(x, y)
         local neighbors = {}
-        local directions = {{
+        local directions = { {
             x = 4,
             y = 0
         }, -- right
-        {
-            x = -4,
-            y = 0
-        }, -- left
-        {
-            x = 0,
-            y = 4
-        }, -- down
-        {
-            x = 0,
-            y = -4
-        } -- up
+            {
+                x = -4,
+                y = 0
+            }, -- left
+            {
+                x = 0,
+                y = 4
+            }, -- down
+            {
+                x = 0,
+                y = -4
+            } -- up
         }
 
         -- Shuffle the directions to increase randomness
@@ -440,7 +442,6 @@ function Map:createCoin(x, y)
 end
 
 function Map:collectCoin(x, y)
-
     for i, coin in ipairs(self.coins) do
         if coin.x == x and coin.y == y then
             local coinSound = self.sound.src.coinSound:clone()
