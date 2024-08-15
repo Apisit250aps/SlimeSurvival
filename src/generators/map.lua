@@ -1,6 +1,8 @@
 local wf = require "libs.windfield"
 local Camera = require "libs.hump.camera"
 local Player = require "src.entities.player"
+local Enemy = require "src.entities.enemy"
+
 local SoundsPlay = require "src.utils.sound"
 Map = {}
 Map.__index = Map
@@ -28,17 +30,23 @@ function Map:new(width, height, tileSize)
 
     cam = Camera(love.graphics.getWidth() / 2, love.graphics.getHeight() / 2)
     player = Player:new(self.world, self:randomPlayerSpawn())
-
+    enemy = Enemy:new() -- Create the enemy instance
     self:createMapBoundaries()
     self:createObjects()
 
     -- Initialize score and timer
     self.score = 0
-    self.timer = 30
+    self.timer = 0
     self.gameOver = false
     self.sound = SoundsPlay:new()
     self.sound.src.gameStart:play()
     self:loadHighScore() -- Load the high score
+
+    self.enemySpawnTimer = 0
+    self.enemies = {}
+    self.enemiesQuntity = 0
+
+    self.coin = 0
 
     return self
 end
@@ -61,9 +69,7 @@ function Map:randomPlayerSpawn()
 end
 
 function Map:update(dt)
-    if self.gameOver then
-        return
-    end
+    if self.gameOver then return end
 
     self.world:update(dt)
     player:update(dt)
@@ -72,13 +78,69 @@ function Map:update(dt)
     end
     cam:lookAt(player.collider:getX(), player.collider:getY())
 
+    -- Update the enemy spawn timer
+    self.enemySpawnTimer = self.enemySpawnTimer + dt
+
+    -- Spawn a new enemy every 5 seconds, or if there are no enemies
+    if self.enemySpawnTimer >= 3 or self.enemiesQuntity == 0 then
+        self.enemySpawnTimer = 0
+        local spawnX, spawnY
+
+        repeat
+            -- Generate a random spawn position within the map boundaries
+            spawnX = (math.random(1, self.width) - self.width / 2) * self.tileSize
+            spawnY = (math.random(1, self.height) - self.height / 2) * self.tileSize
+        until math.sqrt((player.collider:getX() - spawnX) ^ 2 + (player.collider:getY() - spawnY) ^ 2) > math.random(800, 3200)
+
+        -- Create the enemy instance at the valid position
+        local newEnemy = Enemy:new(self.world, spawnX, spawnY)
+        table.insert(self.enemies, newEnemy)
+        self.enemiesQuntity = self.enemiesQuntity + 1
+    end
+
+    -- Update all enemies and check for collisions with the player
+    for i, enemy in ipairs(self.enemies) do
+        enemy:update(player.position.x, player.position.y, dt)
+
+        -- Check for collision with the player
+        if self:checkCollision(player.position, enemy.position) then
+            self.gameOver = true
+        end
+
+        -- Check for collision between this enemy and other enemies
+        for j, otherEnemy in ipairs(self.enemies) do
+            if i ~= j then
+                local distance = math.sqrt((enemy.position.x - otherEnemy.position.x) ^ 2 +
+                    (enemy.position.y - otherEnemy.position.y) ^ 2)
+                if distance < 32 then -- Adjust this value based on the enemy size
+                    -- Push the enemies apart
+                    local pushX = (enemy.position.x - otherEnemy.position.x) * 0.1
+                    local pushY = (enemy.position.y - otherEnemy.position.y) * 0.1
+                    enemy.position.x = enemy.position.x + pushX
+                    enemy.position.y = enemy.position.y + pushY
+                    otherEnemy.position.x = otherEnemy.position.x - pushX
+                    otherEnemy.position.y = otherEnemy.position.y - pushY
+                end
+            end
+        end
+    end
+
     -- Decrease timer
-    if self.timer > 0 then
-        self.timer = self.timer - dt
-    else
-        self.timer = 0
+
+    self.timer = self.timer + dt
+
+
+    -- Update enemy to follow the player
+    enemy:update(player.position.x, player.position.y, dt)
+
+    -- Check for collision between player and enemy
+    if self:checkCollision(player.position, enemy.position) then
         self.gameOver = true
     end
+
+    cam:lookAt(player.collider:getX(), player.collider:getY())
+
+
 
     -- Check for coin collisions
     local px, py = player.collider:getPosition()
@@ -88,15 +150,21 @@ function Map:update(dt)
         local cx, cy = (coin.x - (self.width / 2)) * self.tileSize, (coin.y - (self.height / 2)) * self.tileSize
         if px1 < cx + self.tileSize and px1 + 32 > cx and py1 < cy + self.tileSize and py1 + 32 > cy then
             if self:collectCoin(coin.x, coin.y) then
-                ranScore = math.random(50, 70)
-                player:addScore(ranScore) -- Add points for each collected coin
-                self.score = self.score + ranScore -- Update score
+                coinRan = math.random(5, 15)
+                player:addScore(coinRan)        -- Add points for each collected coin
+                self.coin = self.coin + coinRan -- Update score
             end
         end
     end
+
+    if self.gameOver then
+        self.score = self.coin * self.timer / 10 -- Adjust the multiplier based on the game duration
+    end
+
     if self.gameOver and self.score > self.highScore then
         self.highScore = self.score
         self.sound.src.gameOver:play()
+        self.highScore = math.ceil(self.score)
         self:saveHighScore() -- Save the new high score
     else
         self.sound.src.gameOver:stop()
@@ -125,29 +193,42 @@ function Map:draw()
         love.graphics.draw(self.tiles.coin, (coin.x - (self.width / 2)) * self.tileSize,
             (coin.y - (self.height / 2)) * self.tileSize)
     end
+
     player:draw()
-    cam:detach()
+
+    -- Draw all enemies
+    for _, enemy in ipairs(self.enemies) do
+        enemy:draw()
+    end
+
+    cam:detach() -- Only one cam:detach() is needed here
 
     -- Draw score and timer
     love.graphics.setColor(1, 1, 1)
     love.graphics.setFont(love.graphics.newFont(16))
-    love.graphics.print("High Score: " .. self.highScore, 10, 10)
-    love.graphics.print("Score: " .. self.score, 10, 30)
+    love.graphics.print("High Score: " .. math.ceil(self.highScore), 10, 10)
+    love.graphics.print("Coins: " .. self.coin, 10, 30)
     love.graphics.print("Time: " .. math.ceil(self.timer), 10, 50)
+    love.graphics.print("Enemy: " .. self.enemiesQuntity, 10, 70)
 
     -- Draw game over screen if the game is over
     if self.gameOver then
         love.graphics.setColor(0, 0, 0, 0.7)
         love.graphics.rectangle("fill", 0, 0, love.graphics.getWidth(), love.graphics.getHeight())
         love.graphics.setColor(1, 1, 1)
-        love.graphics.setFont(love.graphics.newFont(48)) -- ขนาดตัวอักษรใหญ่ขึ้น
+        love.graphics.setFont(love.graphics.newFont(48))
         love.graphics.printf("Game Over", 0, love.graphics.getHeight() / 2 - 50, love.graphics.getWidth(), "center")
-        love.graphics.setFont(love.graphics.newFont(36)) -- ขนาดตัวอักษรใหญ่ขึ้นสำหรับคะแนน
-        love.graphics.printf("Final Score: " .. self.score, 0, love.graphics.getHeight() / 2 + 10,
+        love.graphics.setFont(love.graphics.newFont(36))
+        love.graphics.printf("Final Score: " .. math.ceil(self.score), 0, love.graphics.getHeight() / 2 + 10,
             love.graphics.getWidth(), "center")
-        love.graphics.printf("Press R to Restart", 0, love.graphics.getHeight() / 2 + 60, love.graphics.getWidth(),
+        love.graphics.printf("Press R to Restart", 0, love.graphics.getHeight() / 2 + 120, love.graphics.getWidth(),
             "center")
     end
+end
+
+function Map:checkCollision(pos1, pos2)
+    local distance = math.sqrt((pos1.x - pos2.x) ^ 2 + (pos1.y - pos2.y) ^ 2)
+    return distance < 16 -- Adjust this value according to the size of the enemy and player sprites
 end
 
 function Map:keypressed(key)
@@ -170,8 +251,12 @@ function Map:reset()
 
     -- Reset score, timer and game state
     self.score = 0
-    self.timer = 30
+    self.timer = 0
     self.gameOver = false
+
+    self.enemies = {}
+    self.enemySpawnTimer = 0
+    self.enemiesQuntity = 0
 end
 
 function Map:generateMaze()

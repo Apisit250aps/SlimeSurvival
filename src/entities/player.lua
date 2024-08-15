@@ -27,6 +27,8 @@ function Player:new(world, x, y)
     self.collider:setFixedRotation(true) -- ป้องกันไม่ให้ผู้เล่นหมุน
     self.world:addCollisionClass("Player")
     self.collider:setCollisionClass('Player')
+
+
     -- คุณสมบัติทั่วไป
     self.position = {
         x = self.collider:getX(),
@@ -37,9 +39,9 @@ function Player:new(world, x, y)
         y = 0
     }
     self.speed = {
-        min = 250,
+        min = 200,
         base = 200,
-        max = 250
+        max = 300
     }
     self.health = {
         min = 0,
@@ -118,14 +120,12 @@ function Player:update(dt)
 
     -- ซิงค์ตำแหน่งผู้เล่นกับตำแหน่งของคอลลิเดอร์
     self.position.x, self.position.y = self.collider:getPosition()
-
 end
 
 function Player:draw()
     -- self.world:draw()
     self.sprite.currentAnimation:draw(self.sprite.sheet, self.position.x - (self.sprite.size / 2),
         self.position.y - (self.sprite.size / 2), 0, self.sprite.scale, self.sprite.scale)
-
 end
 
 function Player:addScore(amount)

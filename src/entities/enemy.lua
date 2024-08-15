@@ -6,19 +6,19 @@ Enemy.__index = Enemy
 -- Constructor for the Enemy class
 function Enemy:new()
     love.graphics.setDefaultFilter("nearest", "nearest")
-    
+
 
     local self = setmetatable({}, Enemy)
 
 
-    
+
     self.position = { x = 0, y = 0 }
 
 
     self.speed = {
         min = 90,
-        base = 50,
-        max = 90
+        base = 90,
+        max = 160
     }
 
     self.health = {
@@ -37,7 +37,7 @@ function Enemy:new()
         size = 32
     }
 
-    
+
 
     local g = anim8.newGrid(self.sprite.size, self.sprite.size, self.sprite.sheet:getWidth(),
         self.sprite.sheet:getHeight())
@@ -55,6 +55,7 @@ end
 
 -- Update function to move the enemy towards the target position
 function Enemy:update(moveX, moveY, dt)
+    self.speed.base = love.math.random(self.speed.min, self.speed.max,10)
     -- Move in the X direction
     if moveX > self.position.x then
         self.position.x = self.position.x + self.speed.base * dt
@@ -75,10 +76,9 @@ end
 -- Draw function to render the enemy sprite
 function Enemy:draw()
     -- Draw sprite
-  
+
     self.sprite.currentAnimation:draw(self.sprite.sheet, self.position.x, self.position.y, 0, self.sprite.scale,
         self.sprite.scale)
-  
 end
 
 return Enemy
