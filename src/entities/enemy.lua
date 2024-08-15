@@ -4,7 +4,7 @@ local Enemy = {}
 Enemy.__index = Enemy
 
 -- Constructor for the Enemy class
-function Enemy:new( x, y)
+function Enemy:new(x, y)
     love.graphics.setDefaultFilter("nearest", "nearest")
 
 
@@ -28,13 +28,13 @@ function Enemy:new( x, y)
     }
 
     self.sprite = {
-        sheet = love.graphics.newImage("assets/sprites/entities/player.png"),
+        sheet = love.graphics.newImage("assets/sprites/entities/ghost.png"),
         currentAnimation = nil,
         currentFrame = 1,
         frameTimer = 0,
         frameDuration = 0.125,
-        scale = 1,
-        size = 32
+        scale = 2,
+        size = 16
     }
 
 
@@ -42,10 +42,10 @@ function Enemy:new( x, y)
     local g = anim8.newGrid(self.sprite.size, self.sprite.size, self.sprite.sheet:getWidth(),
         self.sprite.sheet:getHeight())
     self.animations = {
-        right = anim8.newAnimation(g('1-4', 2), 0.125),
-        left = anim8.newAnimation(g('1-4', 3), 0.125),
+        right = anim8.newAnimation(g('1-4', 1), 0.125),
+        left = anim8.newAnimation(g('1-4', 1), 0.125),
         down = anim8.newAnimation(g('1-4', 1), 0.125),
-        up = anim8.newAnimation(g('1-4', 4), 0.125)
+        up = anim8.newAnimation(g('1-4', 1), 0.125)
     }
 
     self.sprite.currentAnimation = self.animations.down
@@ -55,7 +55,7 @@ end
 
 -- Update function to move the enemy towards the target position
 function Enemy:update(moveX, moveY, dt)
-    self.speed.base = love.math.random(self.speed.min, self.speed.max,10)
+    self.speed.base = love.math.random(self.speed.min, self.speed.max, 10)
     -- Move in the X direction
     if moveX > self.position.x then
         self.position.x = self.position.x + self.speed.base * dt
