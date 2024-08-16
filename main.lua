@@ -4,7 +4,7 @@ local Map = require "src.generators.map"
 function love.load()
 
     -- Initialize the map
-    map = Map:new(72, 72, 32)
+    map = Map:new(64, 64, 32)
 end
 
 -- Update function

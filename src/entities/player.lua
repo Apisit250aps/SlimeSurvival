@@ -28,7 +28,6 @@ function Player:new(world, x, y)
     self.world:addCollisionClass("Player")
     self.collider:setCollisionClass('Player')
 
-
     -- คุณสมบัติทั่วไป
     self.position = {
         x = self.collider:getX(),
@@ -81,16 +80,16 @@ function Player:update(dt)
     self.velocity.x = 0
     self.velocity.y = 0
 
-    if love.keyboard.isDown("d") then
+    if love.keyboard.isDown("d") or love.keyboard.isDown("right") then
         self.velocity.x = self.speed.base
     end
-    if love.keyboard.isDown("a") then
+    if love.keyboard.isDown("a") or love.keyboard.isDown("left")then
         self.velocity.x = self.speed.base * -1
     end
-    if love.keyboard.isDown("s") then
+    if love.keyboard.isDown("s") or love.keyboard.isDown("down") then
         self.velocity.y = self.speed.base
     end
-    if love.keyboard.isDown("w") then
+    if love.keyboard.isDown("w") or love.keyboard.isDown("up") then
         self.velocity.y = self.speed.base * -1
     end
 

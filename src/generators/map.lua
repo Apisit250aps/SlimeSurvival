@@ -86,7 +86,7 @@ function Map:update(dt)
     self.enemySpawnTimer = self.enemySpawnTimer + dt
 
     -- Spawn a new enemy every 5 seconds, or if there are no enemies
-    if self.enemySpawnTimer >= 3 or self.enemiesQuntity == 0 then
+    if self.enemySpawnTimer >= 5 or self.enemiesQuntity == 0 then
         self.enemySpawnTimer = 0
         local spawnX, spawnY
 
@@ -97,17 +97,14 @@ function Map:update(dt)
         until math.sqrt((player.collider:getX() - spawnX) ^ 2 + (player.collider:getY() - spawnY) ^ 2) > math.random(800, 3200)
 
         -- Create the enemy instance at the valid position
-        local newEnemy = Enemy:new(spawnX, spawnY)
+        local newEnemy = Enemy:new(spawnX, spawnY, player)
         table.insert(self.enemies, newEnemy)
         self.enemiesQuntity = self.enemiesQuntity + 1
     end
 
     -- Update all enemies and check for collisions with the player
     for i, enemy in ipairs(self.enemies) do
-        enemy:update(player.position.x, player.position.y, dt)
-
-
-
+        enemy:update(dt)
         -- Check for collision with the player
         if self:checkCollision(player.position, enemy.position) then
             self.gameOver = true
@@ -130,17 +127,9 @@ function Map:update(dt)
             end
         end
     end
-
     -- Decrease timer
-
     self.timer = self.timer + dt
-
-
-
-
     -- Check for collision between player and enemy
-
-
     cam:lookAt(player.collider:getX(), player.collider:getY())
 
 
@@ -219,7 +208,7 @@ function Map:draw()
 
     -- Print the text inside the rectangle
     love.graphics.print("High Score: " .. math.ceil(self.highScore), uiX + 10, uiY + 10)
-    love.graphics.print("Coins: " .. self.coin, uiX + 10, uiY + 30)
+    love.graphics.print("Pudding: " .. self.coin, uiX + 10, uiY + 30)
     love.graphics.print("Time: " .. math.ceil(self.timer), uiX + 10, uiY + 50)
     love.graphics.print("Enemy: " .. self.enemiesQuntity, uiX + 10, uiY + 70)
 
