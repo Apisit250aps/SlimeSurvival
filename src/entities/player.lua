@@ -9,65 +9,37 @@ function Player:new(world, x, y)
     local self = setmetatable({}, Player)
     self.world = world
 
-    -- Sprite และการตั้งค่าแอนิเมชั่น
+    -- Initialize sprite and animations
     self.sprite = {
         sheet = love.graphics.newImage("assets/sprites/entities/player.png"),
-        currentAnimation = nil,
-        currentFrame = 1,
-        frameTimer = 0,
-        frameDuration = 0.125,
         scale = 1,
-        size = 32
+        size = 32,
+        frameDuration = 0.125,
     }
-
-    self.score = 0
-
-    -- สร้างคอลลิเดอร์
-    self.collider = self.world:newBSGRectangleCollider(x, y, self.sprite.size, self.sprite.size, 10)
-    self.collider:setFixedRotation(true) -- ป้องกันไม่ให้ผู้เล่นหมุน
-    self.world:addCollisionClass("Player")
-    self.collider:setCollisionClass('Player')
-
-    -- คุณสมบัติทั่วไป
-    self.position = {
-        x = self.collider:getX(),
-        y = self.collider:getY()
-    }
-    self.velocity = {
-        x = 0,
-        y = 0
-    }
-    self.speed = {
-        min = 200,
-        base = 200,
-        max = 300
-    }
-    self.health = {
-        min = 0,
-        base = 100,
-        max = 100
-    }
-    self.stamina = {
-        min = 0,
-        base = 100,
-        max = 100
-    }
-
-    self.state = {
-        onMove = false
-    }
-
     local g = anim8.newGrid(self.sprite.size, self.sprite.size, self.sprite.sheet:getWidth(),
         self.sprite.sheet:getHeight())
-
     self.animations = {
         right = anim8.newAnimation(g('1-4', 2), 0.125),
         left = anim8.newAnimation(g('1-4', 3), 0.125),
         down = anim8.newAnimation(g('1-4', 1), 0.125),
         up = anim8.newAnimation(g('1-4', 4), 0.125)
     }
-
     self.sprite.currentAnimation = self.animations.down
+
+    -- Initialize collider
+    self.collider = self.world:newBSGRectangleCollider(x, y, self.sprite.size, self.sprite.size, 10)
+    self.collider:setFixedRotation(true)
+    self.world:addCollisionClass("Player")
+    self.collider:setCollisionClass('Player')
+
+    -- Initialize properties
+    self.position = { x = self.collider:getX(), y = self.collider:getY() }
+    self.velocity = { x = 0, y = 0 }
+    self.speed = { base = 200 }
+    self.health = { min = 0, base = 100, max = 100 }
+    self.stamina = { min = 0, base = 100, max = 100 }
+    self.state = { onMove = false }
+    self.score = 0
 
     return self
 end
@@ -76,55 +48,46 @@ function Player:update(dt)
     self.world:update(dt)
     self.sprite.currentAnimation:update(dt)
 
-    -- รีเซ็ตความเร็ว
-    self.velocity.x = 0
-    self.velocity.y = 0
+    -- Reset velocity
+    self.velocity.x, self.velocity.y = 0, 0
 
-    if love.keyboard.isDown("d") or love.keyboard.isDown("right") then
-        self.velocity.x = self.speed.base
-    end
-    if love.keyboard.isDown("a") or love.keyboard.isDown("left")then
-        self.velocity.x = self.speed.base * -1
-    end
-    if love.keyboard.isDown("s") or love.keyboard.isDown("down") then
-        self.velocity.y = self.speed.base
-    end
-    if love.keyboard.isDown("w") or love.keyboard.isDown("up") then
-        self.velocity.y = self.speed.base * -1
-    end
+    -- Movement controls
+    local speed = self.speed.base
+    if love.keyboard.isDown("d", "right") then self.velocity.x = speed end
+    if love.keyboard.isDown("a", "left") then self.velocity.x = -speed end
+    if love.keyboard.isDown("s", "down") then self.velocity.y = speed end
+    if love.keyboard.isDown("w", "up") then self.velocity.y = -speed end
 
+    -- Determine animation based on direction
     if self.velocity.x > 0 then
         self.sprite.currentAnimation = self.animations.right
-    end
-    if self.velocity.x < 0 then
+    elseif self.velocity.x < 0 then
         self.sprite.currentAnimation = self.animations.left
-    end
-    if self.velocity.y > 0 then
+    elseif self.velocity.y > 0 then
         self.sprite.currentAnimation = self.animations.down
-    end
-    if self.velocity.y < 0 then
+    elseif self.velocity.y < 0 then
         self.sprite.currentAnimation = self.animations.up
-    end
-    if self.velocity.x == 0 and self.velocity.y == 0 then
+    else
         self.sprite.currentAnimation = self.animations.down
     end
 
-    if self.velocity.x ~= 0 and self.velocity.y ~= 0 then
-        self.state.onMove = true
-    else
-        self.state.onMove = false
-    end
-
+    -- Update movement state
+    self.state.onMove = self.velocity.x ~= 0 or self.velocity.y ~= 0
     self.collider:setLinearVelocity(self.velocity.x, self.velocity.y)
 
-    -- ซิงค์ตำแหน่งผู้เล่นกับตำแหน่งของคอลลิเดอร์
+    -- Sync player position with collider
     self.position.x, self.position.y = self.collider:getPosition()
 end
 
 function Player:draw()
-    -- self.world:draw()
-    self.sprite.currentAnimation:draw(self.sprite.sheet, self.position.x - (self.sprite.size / 2),
-        self.position.y - (self.sprite.size / 2), 0, self.sprite.scale, self.sprite.scale)
+    self.sprite.currentAnimation:draw(
+        self.sprite.sheet,
+        self.position.x - self.sprite.size / 2,
+        self.position.y - self.sprite.size / 2,
+        0,
+        self.sprite.scale,
+        self.sprite.scale
+    )
 end
 
 function Player:addScore(amount)
